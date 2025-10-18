@@ -12,7 +12,8 @@
     "lint": "eslint",
     "db:test": "tsx src/lib/tests/test-db.ts",
     "db:seed": "npx prisma db seed",
-    "test:hash": "tsx src/lib/auth/test-hash.ts"
+    "test:hash": "tsx src/lib/auth/test-hash.ts",
+    "test:api:companies": "tsx src/lib/tests/test-api-companies.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
