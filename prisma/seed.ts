@@ -1,4 +1,6 @@
+import { hashPassword } from "@/lib/auth/password";
 import { prisma } from "@/lib/prisma";
+import { UserRole } from "@prisma/client";
 
 async function main() {
   console.log("🌱 Plantando semillas en la base de datos...\n");
@@ -18,6 +20,49 @@ async function main() {
   });
 
   console.log(`✅ Empresa creada o encontrada: ${company.name}\n`);
+
+  const adminPassword = await hashPassword('Admin123!')
+  const sellerPassword = await hashPassword('Seller123!')
+
+  const adminUser = await prisma.user.upsert({
+    where: { email: "admin@miempresa" },
+    update: {},
+    create: {
+      companyId: company.id,
+      email: "admin@miempresa.cl",
+      passwordHash: adminPassword,
+      firstName: "Admin",
+      lastName: "Demo",
+      role: UserRole.admin,
+      isActive: true,
+    },
+  });
+
+  console.log(`Admin creado o encontrado: ${adminUser.email}\n`);
+  console.log('Email: admin@miempresa.cl');
+  console.log('Password: Admin123!\n');
+
+  const sellerUser  = await prisma.user.upsert({
+    where: { email: "seller@miempresa" },
+    update: {},
+    create: {
+      companyId: company.id,
+      email: "seller@miempresa.cl",
+      passwordHash: sellerPassword,
+      firstName: "Seller",
+      lastName: "Demo",
+      role: UserRole.seller,
+      isActive: true,
+    },
+  });
+
+  console.log(`Seller creado o encontrado: ${sellerUser.email}\n`);
+  console.log('Email: seller@miempresa.cl');
+  console.log('Password: Seller123!\n');
+
+
+  console.log('\n🎉 Seed completado exitosamente!')
+  console.log('\n📝 Credenciales de prueba guardadas arriba ⬆️')
 }
 
 main()
