@@ -1,9 +1,11 @@
+const API_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
 async function testRegisterNewUser() {
   console.log('🧪 Test: POST /api/auth/register (registro exitoso)\n')
 
   try {
     const timestamp = Date.now()
-    const response = await fetch('http://localhost:3000/api/auth/register', {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -49,7 +51,7 @@ async function testRegisterWithExistingEmail() {
   console.log('\n🧪 Test: POST /api/auth/register (email duplicado)\n')
 
   try {
-    const response = await fetch('http://localhost:3000/api/auth/register', {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -86,7 +88,7 @@ async function testRegisterWithExistingRut() {
 
   try {
     const timestamp = Date.now()
-    const response = await fetch('http://localhost:3000/api/auth/register', {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -123,7 +125,7 @@ async function testRegisterWithWeakPassword() {
 
   try {
     const timestamp = Date.now()
-    const response = await fetch('http://localhost:3000/api/auth/register', {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -160,7 +162,7 @@ async function testRegisterWithPasswordMismatch() {
 
   try {
     const timestamp = Date.now()
-    const response = await fetch('http://localhost:3000/api/auth/register', {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
