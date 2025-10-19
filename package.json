@@ -13,8 +13,8 @@
     "db:test": "tsx src/lib/tests/test-db.ts",
     "db:seed": "npx prisma db seed",
     "test:hash": "tsx src/lib/auth/test-hash.ts",
-    "test:api:companies": "tsx src/lib/tests/companies/test-api-companies.ts",
-    "test:api:auth:register": "tsx src/lib/tests/auth/test-api-auth-register.ts"
+    "test:api:companies": "tsx src/lib/tests/test-api-companies.ts",
+    "test:api:auth:register": "tsx src/lib/tests/test-api-auth-register.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
