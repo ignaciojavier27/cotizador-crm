@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, serverErrorResponse } from "@/lib/api-response";
 import { requireAdmin, AuthError } from "@/lib/auth/authorize";
-import { createUser } from "@/lib/services/userServices";
+import { createUser, getAllUsers } from "@/lib/services/userServices";
 
 /**
  * POST /api/users
@@ -37,5 +37,25 @@ export async function POST(request: NextRequest) {
     }
 
     return serverErrorResponse("Error al crear el usuario");
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const adminUser = await requireAdmin();
+    const { searchParams } = new URL(request.url);
+    const filters = {
+      companyId: adminUser.companyId,
+      role: searchParams.get("role"),
+      isActive: searchParams.get("isActive"),
+      search: searchParams.get("search"),
+    }
+
+    const result = await getAllUsers(filters);
+    
+    return successResponse(result, "Usuarios obtenidos correctamente", 200);
+  } catch (error) {
+    console.error('Error al listar usuarios:', error)
+    return serverErrorResponse('Error al obtener los usuarios')
   }
 }
