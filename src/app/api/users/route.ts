@@ -56,6 +56,13 @@ export async function GET(request: NextRequest) {
     return successResponse(result, "Usuarios obtenidos correctamente", 200);
   } catch (error) {
     console.error('Error al listar usuarios:', error)
-    return serverErrorResponse('Error al obtener los usuarios')
+    if (error instanceof AuthError) {
+      if (error.code === "UNAUTHORIZED")
+        return errorResponse(error.message, 401);
+      if (error.code === "FORBIDDEN")
+        return errorResponse(error.message, 403);
+    }
+
+    return serverErrorResponse("Error al listar los usuarios");
   }
 }
