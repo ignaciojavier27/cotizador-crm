@@ -6,11 +6,11 @@ async function main() {
   console.log("🌱 Plantando semillas en la base de datos...\n");
 
   const company = await prisma.company.upsert({
-    where: { rut: "111111111-1" },
+    where: { rut: "12345678-9" },
     update: {},
     create: {
       name: "Mi Empresa",
-      rut: "111111111-1",
+      rut: "12345678-9",
       logoUrl:
         "https://dmxg5wxfqgb4u.cloudfront.net/styles/athlete_profile_listing_medium_1x/s3/2025-06/TOPURIA_ILIA_BELT_10-26.png?itok=rSOn_juG",
       address: "Calle 01",
@@ -25,11 +25,11 @@ async function main() {
   const sellerPassword = await hashPassword('Seller123!')
 
   const adminUser = await prisma.user.upsert({
-    where: { email: "admin@miempresa" },
+    where: { email: "admin@empresademo.cl" },
     update: {},
     create: {
       companyId: company.id,
-      email: "admin@miempresa.cl",
+      email: "admin@empresademo.cl",
       passwordHash: adminPassword,
       firstName: "Admin",
       lastName: "Demo",
@@ -39,8 +39,8 @@ async function main() {
   });
 
   console.log(`Admin creado o encontrado: ${adminUser.email}\n`);
-  console.log('Email: admin@miempresa.cl');
-  console.log('Password: Admin123!\n');
+  console.log('Email:' + adminUser.email);
+  console.log(`Password: ${adminPassword}\n`);
 
   const sellerUser  = await prisma.user.upsert({
     where: { email: "seller@miempresa" },
