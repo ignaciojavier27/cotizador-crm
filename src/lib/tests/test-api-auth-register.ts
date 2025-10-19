@@ -23,6 +23,7 @@ async function testRegisterNewUser() {
         companyRut: `${Math.floor(10000000 + Math.random() * 90000000)}-${Math.floor(Math.random() * 10)}`,
         companyPhone: '+56912345678',
         companyAddress: 'Av. Providencia 123, Santiago',
+        companyContactEmail: `contacto${timestamp}@nuevaempresa.cl`,
       }),
     })
 
@@ -57,7 +58,7 @@ async function testRegisterWithExistingEmail() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: 'admin@empresademo.cl', // Email que ya existe del seed
+        email: 'ignacio@correo.cl', // Email que ya existe del seed
         password: 'Password123!',
         confirmPassword: 'Password123!',
         firstName: 'Test',
@@ -100,7 +101,7 @@ async function testRegisterWithExistingRut() {
         firstName: 'Test',
         lastName: 'RUT Duplicado',
         companyName: 'Empresa Test',
-        companyRut: '12345678-9', // RUT que ya existe del seed
+        companyRut: '123456789-0', // RUT que ya existe del seed
       }),
     })
 
@@ -132,7 +133,7 @@ async function testRegisterWithWeakPassword() {
       },
       body: JSON.stringify({
         email: `test${timestamp}@test.cl`,
-        password: 'weak', // Contraseña débil
+        password: 'weak',
         confirmPassword: 'weak',
         firstName: 'Test',
         lastName: 'Password',
