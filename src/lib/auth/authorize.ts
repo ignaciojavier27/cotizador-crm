@@ -46,10 +46,7 @@ export async function requireAdmin() {
 export async function requireCompanyAccess(companyId: string) {
     const user = await requireAuth();
 
-    if(
-        user.companyId !== companyId &&
-        user.role !== UserRole.admin
-    ) throw new AuthError("FORBIDDEN", "No tienes acceso a esta empresa");
+    if( user.companyId !== companyId ) throw new AuthError("FORBIDDEN", "No tienes acceso a esta empresa");
 
     return user;
 }
