@@ -1,6 +1,6 @@
 import { errorResponse, serverErrorResponse, successResponse } from "@/lib/api-response";
-import { requireAuth } from "@/lib/auth/authorize";
-import { getUserById, updateUser } from "@/lib/services/userServices";
+import { requireAdmin, requireAuth } from "@/lib/auth/authorize";
+import { getUserById, updateUser, deleteUser } from "@/lib/services/userServices";
 import { validateUUID } from "@/utils/validations";
 import { AuthError } from "@/lib/auth/authorize";
 import { NextRequest } from "next/server";
@@ -85,4 +85,37 @@ export async function PUT(
 
     return serverErrorResponse("Error al actualizar el usuario");
   }
+}
+
+/**
+ * DELETE /api/users/:id
+ * Eliminar un usuario
+ * Solo accesible para admins
+ * No se puede eliminar el propio usuario
+ */
+
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> } 
+) {
+    try {
+        const currentUser = await requireAdmin();
+        const { id } = await params;
+
+        const isValidUUID = await validateUUID(id);
+        if(!isValidUUID) return errorResponse('El ID ingresado no es válido', 400)
+
+        const deletedUser = await deleteUser(id, currentUser)
+
+        return successResponse(deletedUser, 'Usuario eliminado correctamente', 200);
+    } catch (error) {
+        console.error('Error al eliminar usuario:', error)
+        if (error instanceof AuthError) {
+            if (error.code === "UNAUTHORIZED")
+                return errorResponse(error.message, 401);
+            if (error.code === "FORBIDDEN")
+                return errorResponse(error.message, 403);
+        }
+        return serverErrorResponse("Error al eliminar usuario");
+    }
 }

@@ -285,3 +285,46 @@ export async function updateUser(
 
   return updatedUser;
 } 
+
+
+export async function deleteUser(
+  id: string,
+  currentUser: { 
+    id: string;
+    role: string;
+    companyId: string;
+  }
+) {
+  if (currentUser.role !== "admin") {
+    throw new Error("Solo los administradores pueden eliminar usuarios");
+  }
+
+  const existingUser = await prisma.user.findUnique({
+    where: { 
+      id,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      companyId: true,
+      isActive: true,
+      _count: {
+        select: {
+          quotations: true,
+        },
+      },
+    }
+  });
+
+  if(!existingUser) {
+    throw new Error("El usuario no existe");
+  }
+
+  if (existingUser.companyId !== currentUser.companyId) {
+    throw new Error("No tienes permisos para eliminar este usuario");
+  }
+}
