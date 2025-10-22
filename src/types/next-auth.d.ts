@@ -8,8 +8,8 @@ declare module 'next-auth' {
         email: string;
         role: UserRole
         companyId: string;
-        firstName?: string;
-        lastName?: string;
+        firstName?: string | null;
+        lastName?: string | null;
     }
 
     interface Session {
@@ -30,5 +30,7 @@ declare module 'next-auth/jwt' {
         email: string;
         role: UserRole
         companyId: string;
+        firstName?: string | null;
+        lastName?: string | null;
     }
 }

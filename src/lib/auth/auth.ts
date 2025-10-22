@@ -43,18 +43,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         }
                     });
 
-                    if(!user) {
+                    if(!user || user.deletedAt) {
                         console.error('El usuario no existe');
                         return null;
                     }
 
                     if(!user.isActive) {
                         console.error('El usuario no está activo');
-                        return null;
-                    }
-
-                    if(user.deletedAt) {
-                        console.error('El usuario está eliminado');
                         return null;
                     }
 

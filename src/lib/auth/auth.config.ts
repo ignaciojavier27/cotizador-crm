@@ -28,6 +28,8 @@ export const authConfig: NextAuthConfig = {
                 token.email = user.email;
                 token.role = user.role;
                 token.companyId = user.companyId;
+                token.firstName = user.firstName;
+                token.lastName = user.lastName;
             }
             return token;
         },
@@ -37,6 +39,8 @@ export const authConfig: NextAuthConfig = {
                 session.user.email = token.email!;
                 session.user.role = token.role;
                 session.user.companyId = token.companyId;
+                session.user.firstName = token.firstName;
+                session.user.lastName = token.lastName;
             }
             return session;
         },
