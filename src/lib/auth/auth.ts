@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "./password";
-import { loginSchema } from "../schemas/auth";
+import { loginSchema } from "../validations/auth";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,

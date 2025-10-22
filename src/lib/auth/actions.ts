@@ -2,7 +2,7 @@
 
 import { signIn, signOut } from "./auth";
 import { AuthError } from "next-auth";
-import { loginSchema } from "../schemas/auth";
+import { loginSchema } from "../validations/auth";
 import { LoginResult } from "@/types/auth";
 
 export async function login(

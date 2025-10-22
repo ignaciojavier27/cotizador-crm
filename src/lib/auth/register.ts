@@ -1,5 +1,6 @@
 import { RegisterResult } from "@/types/auth";
-import { registerSchema, userSchema } from "../schemas/auth";
+import { registerSchema } from "../validations/auth";
+import {  userSchema } from "../schemas/auth";
 import { prisma } from "../prisma";
 import { hashPassword } from "./password";
 import { UserRole } from "@prisma/client";
