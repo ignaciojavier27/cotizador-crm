@@ -42,8 +42,16 @@ export async function POST(request: NextRequest) {
 
         if (error instanceof Error) {
             if (error.message.includes('Unique constraint')) {
-            return errorResponse('Ya existe una cuenta con estos datos', 409)
+             return errorResponse('Ya existe una cuenta con estos datos', 409)
             }
+        }
+
+        if (error instanceof Error && error.message.includes('email ya esta registrado')) {
+            return errorResponse('Ya existe una cuenta con este correo', 409)
+        }
+
+        if (error instanceof Error && error.message.includes('registrada con este RUT')) {
+            return errorResponse('Ya existe una cuenta con este RUT', 409)
         }
 
         return serverErrorResponse('Error al crear la cuenta. Por favor intenta nuevamente.')

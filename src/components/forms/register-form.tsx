@@ -39,17 +39,25 @@ export function RegisterForm() {
       if (!res.ok) {
         let message = 'Por favor verifica los datos e intenta nuevamente.'
         try {
-          const data = await res.json()
-          message = data.message || message
-        } catch {}
+          const errorData = await res.json()
+          console.log('Error response data:', errorData)
+          // Extraer el mensaje de la estructura de respuesta del servidor
+          message = errorData.message || errorData.error || message
+        } catch (parseError) {
+          console.error('Error parsing error response:', parseError)
+          // Si no se puede parsear la respuesta, usar el status text
+          message = res.statusText || message
+        }
 
         toast.error('Error al registrar', { description: message })
         return
       }
 
-
+      // Si llegamos aquí, la respuesta fue exitosa
+      const successData = await res.json()
+      
       toast.success('Cuenta creada correctamente', {
-        description: 'Redirigiendo al inicio de sesión...',
+        description: successData.message || 'Redirigiendo al inicio de sesión...',
       })
 
       router.push('/login')
