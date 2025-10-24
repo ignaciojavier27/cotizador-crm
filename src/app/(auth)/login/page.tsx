@@ -47,7 +47,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="mt-8 text-center text-xs text-slate-500">
-          © 2024 Cotizador CRM. Todos los derechos reservados.
+          © 2025 Cotizador CRM. Todos los derechos reservados.
         </p>
       </div>
     </div>

@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
 import { LoginFormData, loginSchema } from '@/lib/validations/auth'
+import ClientOnly from '../ClientOnly'
+import { Skeleton } from '../ui/skeleton'
 
 
 export function LoginForm() {
@@ -29,6 +31,7 @@ export function LoginForm() {
       password: '',
     },
   })
+
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
@@ -67,6 +70,15 @@ export function LoginForm() {
   }
 
   return (
+    <ClientOnly
+      fallback={
+        <div className='space-y-4'>
+          <Skeleton className='h-10 w-full' />
+          <Skeleton className='h-10 w-full' />
+        </div>
+      }
+    >
+
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Email */}
       <div className="space-y-2">
@@ -152,5 +164,6 @@ export function LoginForm() {
 
 
     </form>
+    </ClientOnly>
   )
 }
