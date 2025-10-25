@@ -27,7 +27,10 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
   const router = useRouter()
 
   const handleSignOut = async () => {
-    await signOut({ redirect: false })
+    await signOut({
+      callbackUrl: '/login',
+      redirect: true,
+    })
     router.push('/login')
   }
 
