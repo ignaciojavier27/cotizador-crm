@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { User, LogOut, Settings, Building2, Menu } from 'lucide-react'
-import { signOut } from 'next-auth/react'
+import { logoutAction } from '@/actions/logout'
 
 type NavbarProps = {
   user: {
@@ -25,14 +25,6 @@ type NavbarProps = {
 
 export function Navbar({ user, onMenuClick }: NavbarProps) {
   const router = useRouter()
-
-  const handleSignOut = async () => {
-    await signOut({
-      callbackUrl: '/login',
-      redirect: true,
-    })
-    router.push('/login')
-  }
 
   const displayName = user.firstName && user.lastName
     ? `${user.firstName} ${user.lastName}`
@@ -90,7 +82,7 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
                 <span>Configuración</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+              <DropdownMenuItem onClick={logoutAction} className="text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Cerrar Sesión</span>
               </DropdownMenuItem>
