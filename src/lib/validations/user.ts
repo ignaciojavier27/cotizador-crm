@@ -42,7 +42,8 @@ export const updateUserSchema = z.object({
     .regex(/[A-Z]/, { message: 'La contraseña debe contener al menos una mayúscula' })
     .regex(/[a-z]/, { message: 'La contraseña debe contener al menos una minúscula' })
     .regex(/[0-9]/, { message: 'La contraseña debe contener al menos un número' })
-    .optional(),
+    .optional()
+    .or(z.literal('')),
   firstName: z
     .string()
     .min(2, { message: 'El nombre debe tener al menos 2 caracteres' })
