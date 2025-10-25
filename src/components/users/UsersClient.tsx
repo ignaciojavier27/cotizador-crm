@@ -86,7 +86,7 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
         </div>
         <Button
           onClick={() => router.push('/dashboard/users/create')}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           Nuevo Usuario
