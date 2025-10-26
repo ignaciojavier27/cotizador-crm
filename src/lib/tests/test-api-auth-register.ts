@@ -195,7 +195,7 @@ async function testRegisterWithPasswordMismatch() {
   }
 }
 
-async function runAllTests() {
+async function runAllTestsAuth() {
   console.log('🚀 Ejecutando suite de tests para POST /api/auth/register\n')
   console.log('=' .repeat(60))
   
@@ -209,4 +209,4 @@ async function runAllTests() {
   console.log('\n✅ Suite de tests completada\n')
 }
 
-runAllTests()
+runAllTestsAuth()
