@@ -10,37 +10,36 @@ import { deleteCategory, getCategoryById, updateCategory } from "@/lib/services/
 import { NextRequest } from "next/server";
 
 export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: number }> }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-    try {
-        const currentUser = await requireAuth();
-        
-        const { id } = await params;
+  try {
+    const currentUser = await requireAuth();
+    const id = Number(params.id);
 
-        if(typeof id !== 'number') return errorResponse('El ID ingresado no es valido', 400)
+    if (isNaN(id)) return errorResponse('El ID ingresado no es válido', 400);
 
-        const categoryById = await getCategoryById(id, currentUser.companyId);
+    const categoryById = await getCategoryById(id, currentUser.companyId);
 
-        if(currentUser.companyId !== categoryById.companyId) return errorResponse('No tienes acceso a esta categoría', 403)
+    if (currentUser.companyId !== categoryById.companyId)
+      return errorResponse('No tienes acceso a esta categoría', 403);
 
-        return successResponse(categoryById, 'Categoría obtenida correctamente', 200);
-    } catch (error) {
-        console.error('Error al obtener categoría:', error)
-        if (error instanceof AuthError) {
-            if (error.code === "UNAUTHORIZED")
-                return errorResponse(error.message, 401);
-            if (error.code === "FORBIDDEN")
-                return errorResponse(error.message, 403);
-        }
-
-        if(error instanceof Error && error.message.includes("no encontrada")) {
-            return errorResponse(error.message, 404);
-        }
-
-        return serverErrorResponse("Error al obtener la categoría");
-
+    return successResponse(categoryById, 'Categoría obtenida correctamente', 200);
+  } catch (error) {
+    console.error('Error al obtener categoría:', error);
+    if (error instanceof AuthError) {
+      if (error.code === 'UNAUTHORIZED')
+        return errorResponse(error.message, 401);
+      if (error.code === 'FORBIDDEN')
+        return errorResponse(error.message, 403);
     }
+
+    if (error instanceof Error && error.message.includes('no encontrada')) {
+      return errorResponse(error.message, 404);
+    }
+
+    return serverErrorResponse('Error al obtener la categoría');
+  }
 }
 
 /**
@@ -51,14 +50,15 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: Promise<{ id: number }> }
+    { params }: { params: { id: string } }
 ) {
     try {
         const currentUser = await requireAdmin();
-        const { id } = await params;
-        const body = await request.json();
+        const id = Number(params.id);
 
-        if(typeof id !== 'number') return errorResponse('El ID ingresado no es valido', 400)
+        if (isNaN(id)) return errorResponse('El ID ingresado no es válido', 400);
+
+        const body = await request.json();
         
         const updatedCategory = await updateCategory(id, body, currentUser.companyId);
 
@@ -75,6 +75,11 @@ export async function PUT(
             if (error.message.includes("no encontrada")) {
                 return errorResponse(error.message, 404);
             }
+
+            if (error.message.includes("no pertenece")) {
+                return errorResponse(error.message, 403);
+            }
+
             if (error.message.includes("mismo nombre")) {
                 return errorResponse(error.message, 409);
             }
@@ -93,13 +98,13 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: number }> }
+    { params }: { params: { id: string } }
 ) {
     try {
         const currentUser = await requireAdmin();
-        const { id } = await params;
+        const id = Number(params.id);
 
-        if(typeof id !== 'number') return errorResponse('El ID ingresado no es valido', 400)
+        if(isNaN(id)) return errorResponse('El ID ingresado no es valido', 400)
 
         const deletedCategory = await deleteCategory(id, currentUser.companyId);
 
@@ -115,6 +120,10 @@ export async function DELETE(
         if (error instanceof Error) {
             if (error.message.includes("no encontrada")) {
                 return errorResponse(error.message, 404);
+            }
+
+            if (error.message.includes("no pertenece")) {
+                return errorResponse(error.message, 403);
             }
         }
         return serverErrorResponse("Error al eliminar la categoría");

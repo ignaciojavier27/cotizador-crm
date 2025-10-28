@@ -122,8 +122,12 @@ export async function updateCategory(
     where: { id, companyId },
   });
 
-  if (!category) {
+  if(category?.companyId !== companyId) {
     throw new Error("Categoría no encontrada o no pertenece a esta empresa");
+  }
+
+  if (!category) {
+    throw new Error("Categoría no encontrada a esta empresa");
   }
 
   const existingCategory = await prisma.category.findFirst({
@@ -155,6 +159,10 @@ export async function deleteCategory(id: number, companyId: string) {
   const category = await prisma.category.findFirst({
     where: { id, companyId },
   });
+
+  if(category?.companyId !== companyId) {
+    throw new Error("Categoría no encontrada o no pertenece a esta empresa");
+  }
 
   if (!category) {
     throw new Error("Categoría no encontrada");
