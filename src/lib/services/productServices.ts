@@ -24,7 +24,11 @@ export async function createProduct(
     const validatedData = validationResult.data;
 
     const existingProduct = await prisma.product.findFirst({
-        where: { name: validatedData.name, deletedAt: null },
+        where: { 
+            name: validatedData.name, 
+            companyId,
+            deletedAt: null 
+        },
     });
 
     if (existingProduct) {
@@ -53,6 +57,8 @@ export async function createProduct(
             taxPercentage: true,
             isActive: true,
             createdAt: true,
+            updatedAt: true,
+            companyId: true,
             company: {
                 select: {
                     id: true,
@@ -72,87 +78,113 @@ export async function createProduct(
     return newProduct;
 }
 
-export async function getAllProducts(
-    params: {
-        companyId: string;
-        isActive?: string | null;
-        search?: string | null;
-        categoryId?: string | null;
-    }
-) {
-    const { companyId, isActive, search, categoryId } = params;
+export async function getAllProducts(params: {
+  companyId: string;
+  isActive?: string | null;
+  search?: string | null;
+  categoryId?: string | null;
+}) {
+  const { companyId, isActive, search, categoryId } = params;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = { companyId, deletedAt: null };
+  const where: Record<string, unknown> = { companyId, deletedAt: null };
 
-    if (isActive !== null && isActive !== undefined) {
-        where.isActive = isActive === 'true';
-    }
+  if (isActive !== null && isActive !== undefined) {
+    where.isActive = isActive === 'true';
+  }
 
-    if (search) {
-        where.OR = [
-            { name: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } },
-        ];
-    }
+  if (search) {
+    where.OR = [
+      { name: { contains: search } },
+      { description: { contains: search } },
+    ];
+  }
 
-    if (categoryId) {
-        where.categoryId = Number(categoryId);
-    }
+  if (categoryId && !isNaN(Number(categoryId))) {
+    where.categoryId = Number(categoryId);
+  }
 
-    const products = await prisma.product.findMany({
-        where,
-        select: {
-            id: true,
-            name: true,
-            description: true,
-            type: true,
-            brand: true,
-            basePrice: true,
-            taxPercentage: true,
-            isActive: true,
-            createdAt: true,
-            company: {
-                select: {
-                    id: true,
-                    name: true,
-                    rut: true,
-                },
-            },
-            category: {
-                select: {
-                    id: true,
-                    name: true,
-                },
-            },
-            _count: {
-                select: {
-                    quotationDetails: true
-                },
-            }
-        },
-        orderBy: [
-            { isActive: 'desc' },
-            { createdAt: 'desc' },
-        ]
-    });
+  const prismaProducts = await prisma.product.findMany({
+    where,
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      type: true,
+      brand: true,
+      basePrice: true,
+      taxPercentage: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+      companyId: true,
+      company: {
+        select: { id: true, name: true, rut: true },
+      },
+      category: {
+        select: { id: true, name: true },
+      },
+      _count: {
+        select: { quotationDetails: true },
+      },
+    },
+    orderBy: [
+      { isActive: 'desc' },
+      { createdAt: 'desc' },
+    ],
+  });
 
-    return {
-        products,
-        total: products.length,
-        filters: {
-            search: search || '',
-            company: companyId,
-            isActive: isActive || '',
-            categoryId: categoryId || '',
-        },
-    }
+  // Adaptación para que coincida con ProductFull
+  const products = prismaProducts.map((p) => ({
+    id: String(p.id),
+    name: p.name,
+    description: p.description ?? '',
+    type: p.type ?? '',
+    brand: p.brand ?? '',
+    basePrice: Number(p.basePrice),
+    taxPercentage: p.taxPercentage ? Number(p.taxPercentage) : 0,
+    isActive: p.isActive,
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt ? p.updatedAt.toISOString() : undefined,
+    companyId: String(p.companyId),
+    company: p.company
+      ? {
+          id: String(p.company.id),
+          name: p.company.name,
+        }
+      : undefined,
+    categoryId: p.category ? String(p.category.id) : undefined,
+    category: p.category
+      ? {
+          id: String(p.category.id),
+          name: p.category.name,
+        }
+      : null,
+    _count: p._count,
+  }));
+
+  return {
+    products,
+    total: products.length,
+    filters: {
+      search: search || '',
+      company: companyId,
+      isActive: isActive || '',
+      categoryId: categoryId || '',
+    },
+  };
 }
 
-export async function getProductById(id: number) {
+export async function getProductById(id: string) {
+
+    const productId = Number(id);
+
+    if(isNaN(productId)) {
+        throw new Error("El ID ingresado no es valido");
+    }
+
     const product = await prisma.product.findUnique({
         where: { 
-            id,
+            id: productId,
             deletedAt: null 
         },
         select: {
@@ -165,6 +197,8 @@ export async function getProductById(id: number) {
             taxPercentage: true,
             isActive: true,
             createdAt: true,
+            updatedAt: true,
+            companyId: true,
             company: {
                 select: {
                     id: true,
@@ -194,7 +228,7 @@ export async function getProductById(id: number) {
 }
 
 export async function updateProduct(
-    id: number,
+    id: string,
     data: UpdateProductInput,
     currentUser: { 
         id: string;
@@ -202,9 +236,14 @@ export async function updateProduct(
         companyId: string;
     }
 ) {
+    const productId = Number(id);
+    
+    if (isNaN(productId)) {
+        throw new Error("ID de producto inválido");
+    }
 
     const existingProduct = await prisma.product.findUnique({
-        where: { id },
+        where: { id: productId },
     });
 
     if (!existingProduct || existingProduct.deletedAt) {
@@ -239,6 +278,7 @@ export async function updateProduct(
         const existingProductWithName = await prisma.product.findFirst({
             where: {
                 name: validatedData.name,
+                companyId: currentUser.companyId,
                 deletedAt: null
             }
         });
@@ -260,7 +300,7 @@ export async function updateProduct(
     if(validatedData.categoryId) updateData.category = { connect: { id: validatedData.categoryId } };
 
     const updatedProduct = await prisma.product.update({ 
-        where: { id }, 
+        where: { id: productId }, 
         data: updateData,
         select: {
             id: true,
@@ -272,6 +312,8 @@ export async function updateProduct(
             taxPercentage: true,
             isActive: true,
             createdAt: true,
+            updatedAt: true,
+            companyId: true,
             company: {
                 select: {
                     id: true,
@@ -292,20 +334,26 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(
-    id: number,
+    id: string,
     currentUser: { 
         id: string;
         role: string;
         companyId: string;
     }
 ) {
+    const productId = Number(id);
+    
+    if (isNaN(productId)) {
+        throw new Error("ID de producto inválido");
+    }
+
     if(currentUser.role !== UserRole.admin) {
         throw new Error("Solo los administradores pueden eliminar productos");
     }
 
     const existingProduct = await prisma.product.findUnique({
         where: { 
-            id,
+            id: productId,
             deletedAt: null,
         }
     });
@@ -319,7 +367,7 @@ export async function deleteProduct(
     }
 
     const deletedProduct = await prisma.product.update({ 
-        where: { id }, 
+        where: { id: productId }, 
         data: { deletedAt: new Date() },
         select: {
             id: true,
@@ -331,6 +379,8 @@ export async function deleteProduct(
             taxPercentage: true,
             isActive: true,
             createdAt: true,
+            updatedAt: true,
+            companyId: true,
             company: {
                 select: {
                     id: true,
@@ -349,3 +399,44 @@ export async function deleteProduct(
 
     return deletedProduct;
 }
+
+export async function getActiveProducts(companyId: string) {
+    const products = await prisma.product.findMany({
+        where: { 
+            companyId, 
+            isActive: true,
+            deletedAt: null 
+        },
+        select: {
+            id: true,
+            name: true,
+            basePrice: true,
+            taxPercentage: true,
+            brand: true,
+            type: true,
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
+        orderBy: { name: 'asc' },
+    });
+
+    return products.map(p => ({
+        id: String(p.id),
+        name: p.name,
+        basePrice: Number(p.basePrice),
+        taxPercentage: p.taxPercentage ? Number(p.taxPercentage) : 0,
+        brand: p.brand ?? '',
+        type: p.type ?? '',
+        category: p.category ? {
+            id: String(p.category.id),
+            name: p.category.name,
+        } : null,
+    }));
+}
+
+
+

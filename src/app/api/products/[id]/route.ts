@@ -8,23 +8,29 @@ import { NextRequest } from "next/server";
  * Obtener un producto por su ID
  * Solo accesible para usuarios autenticados de la misma empresa
  */
-export async function GET (
+export async function GET(
     request: NextRequest,
-    { params }: { params: Promise<{ id: number }> }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await requireAuth();
-        const { id } = await params;
-
-        if(typeof id !== 'number') return errorResponse('El ID ingresado no es valido', 400)
+        const { id: idParam } = await params;
+        
+        // Convertir y validar el ID
+        const id = Number(idParam);
+        if (isNaN(id)) {
+            return errorResponse('El ID ingresado no es válido', 400);
+        }
 
         const productById = await getProductById(id);
 
-        if(user.companyId !== productById.company.id) return errorResponse('No tienes acceso a este producto', 403)
+        if (user.companyId !== productById.company.id) {
+            return errorResponse('No tienes acceso a este producto', 403);
+        }
 
         return successResponse(productById, 'Producto obtenido correctamente', 200);
     } catch (error) {
-        console.error('Error al obtener producto:', error)
+        console.error('Error al obtener producto:', error);
 
         if (error instanceof AuthError) {
             if (error.code === "UNAUTHORIZED")
@@ -33,10 +39,10 @@ export async function GET (
                 return errorResponse(error.message, 403);
         }
 
-
         if (error instanceof Error && error.message.includes("no encontrado")) {
             return errorResponse(error.message, 404);
         }
+        
         return serverErrorResponse("Error al obtener el producto");
     }
 }
@@ -46,25 +52,34 @@ export async function GET (
  * Actualizar un producto
  * Solo accesible para admins
  */
-export async function PUT (
+export async function PUT(
     request: NextRequest,
-    { params }: { params: Promise<{ id: number }> }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const currentUser = await requireAuth();
-        const { id } = await params;
+        const { id: idParam } = await params;
+        
+        // Convertir y validar el ID
+        const id = Number(idParam);
+        if (isNaN(id)) {
+            return errorResponse('El ID ingresado no es válido', 400);
+        }
+
         const body = await request.json();
         const updatedProduct = await updateProduct(id, body, currentUser);
 
         return successResponse(updatedProduct, "Producto actualizado exitosamente");
     } catch (error) {
         console.error("Error al actualizar producto:", error);
+        
         if (error instanceof AuthError) {
             if (error.code === "UNAUTHORIZED")
                 return errorResponse(error.message, 401);
             if (error.code === "FORBIDDEN")
                 return errorResponse(error.message, 403);
         }
+        
         if (error instanceof Error) {
             if (error.message.includes("no encontrado")) {
                 return errorResponse(error.message, 404);
@@ -76,46 +91,52 @@ export async function PUT (
                 return errorResponse(error.message, 403);
             }
         }
+        
         return serverErrorResponse("Error al actualizar el producto");
-    } 
+    }
 }
-
 
 /**
  * DELETE /api/products/:id
  * Eliminar un producto
  * Solo accesible para admins
  */
-export async function DELETE (
+export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> } 
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const currentUser = await requireAuth();
-        const { id } = await params;
+        const { id: idParam } = await params;
+        
+        // Convertir y validar el ID
+        const id = Number(idParam);
+        if (isNaN(id)) {
+            return errorResponse('El ID ingresado no es válido', 400);
+        }
 
-        if(typeof id !== 'number') return errorResponse('El ID ingresado no es valido', 400)
-
-        const deletedProduct = await deleteProduct(id, currentUser)
+        const deletedProduct = await deleteProduct(id, currentUser);
 
         return successResponse(deletedProduct, 'Producto eliminado correctamente', 200);
     } catch (error) {
-        console.error('Error al eliminar producto:', error)
+        console.error('Error al eliminar producto:', error);
+        
         if (error instanceof AuthError) {
             if (error.code === "UNAUTHORIZED")
                 return errorResponse(error.message, 401);
             if (error.code === "FORBIDDEN")
                 return errorResponse(error.message, 403);
         }
+        
         if (error instanceof Error) {
             if (error.message.includes("no encontrado")) {
                 return errorResponse(error.message, 404);
             }
-
             if (error.message.includes("No tienes permisos")) {
                 return errorResponse(error.message, 403);
             }
         }
+        
         return serverErrorResponse("Error al eliminar el producto");
     }
 }
