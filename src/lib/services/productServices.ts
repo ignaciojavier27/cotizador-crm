@@ -135,7 +135,7 @@ export async function getAllProducts(params: {
 
   // Adaptación para que coincida con ProductFull
   const products = prismaProducts.map((p) => ({
-    id: String(p.id),
+    id: p.id,
     name: p.name,
     description: p.description ?? '',
     type: p.type ?? '',
@@ -145,17 +145,17 @@ export async function getAllProducts(params: {
     isActive: p.isActive,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt ? p.updatedAt.toISOString() : undefined,
-    companyId: String(p.companyId),
+    companyId: p.companyId,
     company: p.company
       ? {
-          id: String(p.company.id),
+          id: p.company.id,
           name: p.company.name,
         }
       : undefined,
-    categoryId: p.category ? String(p.category.id) : undefined,
+    categoryId: p.category ? p.category.id : undefined,
     category: p.category
       ? {
-          id: String(p.category.id),
+          id: p.category.id,
           name: p.category.name,
         }
       : null,
@@ -176,15 +176,14 @@ export async function getAllProducts(params: {
 
 export async function getProductById(id: string) {
 
-    const productId = Number(id);
 
-    if(isNaN(productId)) {
-        throw new Error("El ID ingresado no es valido");
+    if(!id) {
+        throw new Error("ID de producto inválido");
     }
 
     const product = await prisma.product.findUnique({
         where: { 
-            id: productId,
+            id,
             deletedAt: null 
         },
         select: {
@@ -236,14 +235,13 @@ export async function updateProduct(
         companyId: string;
     }
 ) {
-    const productId = Number(id);
-    
-    if (isNaN(productId)) {
+
+    if(!id) {
         throw new Error("ID de producto inválido");
     }
 
     const existingProduct = await prisma.product.findUnique({
-        where: { id: productId },
+        where: { id, deletedAt: null },
     });
 
     if (!existingProduct || existingProduct.deletedAt) {
@@ -300,7 +298,7 @@ export async function updateProduct(
     if(validatedData.categoryId) updateData.category = { connect: { id: validatedData.categoryId } };
 
     const updatedProduct = await prisma.product.update({ 
-        where: { id: productId }, 
+        where: { id}, 
         data: updateData,
         select: {
             id: true,
@@ -341,9 +339,7 @@ export async function deleteProduct(
         companyId: string;
     }
 ) {
-    const productId = Number(id);
-    
-    if (isNaN(productId)) {
+    if(!id) {
         throw new Error("ID de producto inválido");
     }
 
@@ -353,7 +349,7 @@ export async function deleteProduct(
 
     const existingProduct = await prisma.product.findUnique({
         where: { 
-            id: productId,
+            id,
             deletedAt: null,
         }
     });
@@ -367,7 +363,7 @@ export async function deleteProduct(
     }
 
     const deletedProduct = await prisma.product.update({ 
-        where: { id: productId }, 
+        where: { id }, 
         data: { deletedAt: new Date() },
         select: {
             id: true,
@@ -425,14 +421,14 @@ export async function getActiveProducts(companyId: string) {
     });
 
     return products.map(p => ({
-        id: String(p.id),
+        id: p.id,
         name: p.name,
         basePrice: Number(p.basePrice),
         taxPercentage: p.taxPercentage ? Number(p.taxPercentage) : 0,
         brand: p.brand ?? '',
         type: p.type ?? '',
         category: p.category ? {
-            id: String(p.category.id),
+            id: p.category.id,
             name: p.category.name,
         } : null,
     }));

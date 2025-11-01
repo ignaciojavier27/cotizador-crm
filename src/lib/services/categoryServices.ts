@@ -79,7 +79,7 @@ export async function getCategories(
 
 
 // ✅ Obtener una categoría por ID
-export async function getCategoryById(id: number, companyId: string) {
+export async function getCategoryById(id: string, companyId: string) {
   const category = await prisma.category.findFirst({
     where: { id, companyId },
   });
@@ -95,7 +95,7 @@ export async function getCategoryById(id: number, companyId: string) {
 
 // ✅ Actualizar categoría
 export async function updateCategory(
-  id: number,
+  id: string,
   data: unknown,
   companyId: string
 ) {
@@ -155,7 +155,7 @@ export async function updateCategory(
 
 
 // ✅ Eliminar categoría
-export async function deleteCategory(id: number, companyId: string) {
+export async function deleteCategory(id: string, companyId: string) {
   const category = await prisma.category.findFirst({
     where: { id, companyId },
   });

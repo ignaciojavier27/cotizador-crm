@@ -1,14 +1,14 @@
 import { useState, useCallback } from 'react';
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   createdAt: string;
 }
 
 export interface CategoryDB {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   companyId: string;
@@ -92,7 +92,7 @@ export function useCategories(initialCategories: Category[] = []) {
     }
   }, []);
 
-  const fetchCategoryById = useCallback(async (id: number) => {
+  const fetchCategoryById = useCallback(async (id: string) => {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/categories/${id}`);
@@ -112,7 +112,7 @@ export function useCategories(initialCategories: Category[] = []) {
     }
   }, [])
 
-  const updateCategory = useCallback(async (id: number, data: {
+  const updateCategory = useCallback(async (id: string, data: {
     name?: string;
     description?: string;
   }) => {
@@ -154,7 +154,7 @@ export function useCategories(initialCategories: Category[] = []) {
     }
   }, []);
 
-  const deleteCategory = useCallback(async (id: number) => {
+  const deleteCategory = useCallback(async (id: string) => {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/categories/${id}`, {

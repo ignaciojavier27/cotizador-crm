@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -69,10 +66,10 @@ enum UserRole {
 }
 
 // =====================
-// MODELO: CATEGORY
+// MODELO: CATEGORY (MIGRADO)
 // =====================
 model Category {
-  id          Int       @id @default(autoincrement())
+  id          String    @id @default(uuid()) @db.Char(36)  // ← CAMBIADO A STRING
   companyId   String    @map("company_id") @db.Char(36)
   name        String    @db.VarChar(255)
   description String?   @db.Text
@@ -87,12 +84,12 @@ model Category {
 }
 
 // ==========================================
-// MODELO: PRODUCT
+// MODELO: PRODUCT (MIGRADO)
 // ==========================================
 model Product {
-  id            Int       @id @default(autoincrement())
+  id            String    @id @default(uuid()) @db.Char(36)  // ← CAMBIADO A STRING
   companyId     String    @map("company_id") @db.Char(36)
-  categoryId    Int?      @map("category_id")
+  categoryId    String?   @map("category_id") @db.Char(36)   // ← CAMBIADO A STRING
   name          String    @db.VarChar(255)
   description   String?   @db.Text
   type          String?   @db.VarChar(100)
@@ -104,7 +101,6 @@ model Product {
   updatedAt     DateTime? @updatedAt @map("updated_at") @db.DateTime(0)
   deletedAt     DateTime? @map("deleted_at") @db.DateTime(0)
 
-  // Relaciones
   company          Company           @relation(fields: [companyId], references: [id])
   category         Category?         @relation(fields: [categoryId], references: [id])
   quotationDetails QuotationDetail[]
@@ -131,7 +127,6 @@ model Client {
   updatedAt        DateTime? @updatedAt @map("updated_at") @db.DateTime(0)
   deletedAt        DateTime? @map("deleted_at") @db.DateTime(0)
 
-  // Relaciones
   company    Company     @relation(fields: [companyId], references: [id])
   quotations Quotation[]
 
@@ -140,10 +135,10 @@ model Client {
 }
 
 // ==========================================
-// MODELO: QUOTATION
+// MODELO: QUOTATION (MIGRADO)
 // ==========================================
 model Quotation {
-  id              Int             @id @default(autoincrement())
+  id              String          @id @default(uuid()) @db.Char(36)  // ← CAMBIADO A STRING
   quotationNumber String          @unique @map("quotation_number") @db.VarChar(50)
   userId          String          @map("user_id") @db.Char(36)
   clientId        String          @map("client_id") @db.Char(36)
@@ -160,7 +155,6 @@ model Quotation {
   updatedAt       DateTime?       @updatedAt @map("updated_at") @db.DateTime(0)
   deletedAt       DateTime?       @map("deleted_at") @db.DateTime(0)
 
-  // Relaciones
   user          User               @relation(fields: [userId], references: [id])
   client        Client             @relation(fields: [clientId], references: [id])
   company       Company            @relation(fields: [companyId], references: [id])
@@ -182,18 +176,17 @@ enum QuotationStatus {
 }
 
 // ==========================================
-// MODELO: QUOTATION_DETAIL
+// MODELO: QUOTATION_DETAIL (MIGRADO)
 // ==========================================
 model QuotationDetail {
-  id          Int      @id @default(autoincrement())
-  quotationId Int      @map("quotation_id")
-  productId   Int      @map("product_id")
+  id          String    @id @default(uuid()) @db.Char(36)  // ← CAMBIADO A STRING
+  quotationId String    @map("quotation_id") @db.Char(36)  // ← CAMBIADO A STRING
+  productId   String    @map("product_id") @db.Char(36)    // ← CAMBIADO A STRING
   quantity    Int
-  unitPrice   Decimal  @map("unit_price") @db.Decimal(10, 2)
-  subtotal    Decimal? @db.Decimal(12, 2)
-  lineTax     Decimal? @map("line_tax") @db.Decimal(12, 2)
+  unitPrice   Decimal   @map("unit_price") @db.Decimal(10, 2)
+  subtotal    Decimal?  @db.Decimal(12, 2)
+  lineTax     Decimal?  @map("line_tax") @db.Decimal(12, 2)
 
-  // Relaciones
   quotation Quotation @relation(fields: [quotationId], references: [id])
   product   Product   @relation(fields: [productId], references: [id])
 
@@ -203,18 +196,17 @@ model QuotationDetail {
 }
 
 // ==========================================
-// MODELO: QUOTATION_HISTORY
+// MODELO: QUOTATION_HISTORY (MIGRADO)
 // ==========================================
 model QuotationHistory {
-  id             Int              @id @default(autoincrement())
-  quotationId    Int              @map("quotation_id")
+  id             String           @id @default(uuid()) @db.Char(36)  // ← CAMBIADO A STRING
+  quotationId    String           @map("quotation_id") @db.Char(36)  // ← CAMBIADO A STRING
   userId         String           @map("user_id") @db.Char(36)
   previousStatus QuotationStatus? @map("previous_status")
   newStatus      QuotationStatus? @map("new_status")
   changeReason   String?          @map("change_reason") @db.VarChar(500)
   changedAt      DateTime         @default(now()) @map("changed_at") @db.DateTime(0)
 
-  // Relaciones
   quotation Quotation @relation(fields: [quotationId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
 
@@ -224,10 +216,10 @@ model QuotationHistory {
 }
 
 // ==========================================
-// MODELO: AUTOMATION
+// MODELO: AUTOMATION (MIGRADO)
 // ==========================================
 model Automation {
-  id           Int            @id @default(autoincrement())
+  id           String         @id @default(uuid()) @db.Char(36)  // ← CAMBIADO A STRING
   companyId    String         @map("company_id") @db.Char(36)
   type         AutomationType
   daysWait     Int?           @map("days_wait")
@@ -238,7 +230,6 @@ model Automation {
   updatedAt    DateTime?      @updatedAt @map("updated_at") @db.DateTime(0)
   deletedAt    DateTime?      @map("deleted_at") @db.DateTime(0)
 
-  // Relaciones
   company       Company            @relation(fields: [companyId], references: [id])
   notifications NotificationSent[]
 
@@ -252,12 +243,12 @@ enum AutomationType {
 }
 
 // ==========================================
-// MODELO: NOTIFICATION_SENT
+// MODELO: NOTIFICATION_SENT (MIGRADO)
 // ==========================================
 model NotificationSent {
-  id             Int            @id @default(autoincrement())
-  quotationId    Int            @map("quotation_id")
-  automationId   Int?           @map("automation_id")
+  id             String         @id @default(uuid()) @db.Char(36)  // ← CAMBIADO A STRING
+  quotationId    String         @map("quotation_id") @db.Char(36)  // ← CAMBIADO A STRING
+  automationId   String?        @map("automation_id") @db.Char(36) // ← CAMBIADO A STRING
   recipientEmail String         @map("recipient_email") @db.VarChar(255)
   type           AutomationType
   sendStatus     SendStatus     @default(pending) @map("send_status")
@@ -265,7 +256,6 @@ model NotificationSent {
   sentAt         DateTime?      @map("sent_at") @db.DateTime(0)
   updatedAt      DateTime?      @updatedAt @map("updated_at") @db.DateTime(0)
 
-  // Relaciones
   quotation  Quotation   @relation(fields: [quotationId], references: [id])
   automation Automation? @relation(fields: [automationId], references: [id])
 

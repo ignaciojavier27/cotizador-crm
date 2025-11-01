@@ -16,7 +16,7 @@ import { Loader2, Save } from "lucide-react";
 
 export default function EditCategoryForm(
     { categoryId, currentUser }: {
-        categoryId: number;
+        categoryId: string;
         currentUser: { 
             id: string;
             role: string;

@@ -15,9 +15,9 @@ export async function GET(
 ) {
   try {
     const currentUser = await requireAuth();
-    const id = Number(params.id);
+    const id = params.id;
 
-    if (isNaN(id)) return errorResponse('El ID ingresado no es válido', 400);
+    if(!id) return errorResponse('El ID ingresado no es valido', 400)
 
     const categoryById = await getCategoryById(id, currentUser.companyId);
 
@@ -54,9 +54,9 @@ export async function PUT(
 ) {
     try {
         const currentUser = await requireAdmin();
-        const id = Number(params.id);
+        const id = params.id;
 
-        if (isNaN(id)) return errorResponse('El ID ingresado no es válido', 400);
+        if(!id) return errorResponse('El ID ingresado no es valido', 400)
 
         const body = await request.json();
         
@@ -102,9 +102,9 @@ export async function DELETE(
 ) {
     try {
         const currentUser = await requireAdmin();
-        const id = Number(params.id);
+        const id = params.id;
 
-        if(isNaN(id)) return errorResponse('El ID ingresado no es valido', 400)
+        if(!id) return errorResponse('El ID ingresado no es valido', 400)
 
         const deletedCategory = await deleteCategory(id, currentUser.companyId);
 

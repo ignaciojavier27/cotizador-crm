@@ -99,13 +99,13 @@ export interface ActiveProductsResponse {
  */
 export interface CreateProductData {
   name: string;
-  description: string;
-  type: string;
-  brand: string;
+  description?: string;
+  type?: string;
+  brand?: string;
   basePrice: number;
-  taxPercentage: number;
+  taxPercentage?: number;
   isActive: boolean;
-  categoryId?: number;
+  categoryId?: string;
 }
 
 /**
@@ -119,7 +119,7 @@ export interface UpdateProductData {
   basePrice?: number;
   taxPercentage?: number;
   isActive?: boolean;
-  categoryId?: number;
+  categoryId?: string;
 }
 
 /**

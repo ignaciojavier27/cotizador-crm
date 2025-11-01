@@ -22,6 +22,7 @@ export function errorResponse(error: string, status: number = 400) {
   return NextResponse.json(
     {
       success: false,
+      message: error,
       error,
     } as ApiResponse,
     { status }

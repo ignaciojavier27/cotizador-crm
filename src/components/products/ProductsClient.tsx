@@ -376,7 +376,7 @@ export default function ProductsClient({ initialProducts, categories }: Products
           {hasFilters && ' (filtrados)'}
         </div>
         
-        {hasFilters && (
+        {(hasFilters && activeFiltersCount > 0 )&& (
           <Button variant="outline" onClick={handleClearFilters} className="flex items-center gap-2">
             <X className="w-4 h-4" />
             Limpiar filtros

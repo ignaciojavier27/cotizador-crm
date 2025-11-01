@@ -50,7 +50,7 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
     await fetchCategories(searchTerm);
   };
 
-  const handleDeleteCategory = async (id: number, name: string) => {
+  const handleDeleteCategory = async (id: string, name: string) => {
     if (!confirmDelete(name)) {
       return;
     }

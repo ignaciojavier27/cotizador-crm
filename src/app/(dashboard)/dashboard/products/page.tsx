@@ -69,7 +69,7 @@ async function getCategories(companyId: string): Promise<Category[]> {
     });
 
     return categories.map(cat => ({
-      id: String(cat.id),
+      id: cat.id,
       name: cat.name,
       description: cat.description || undefined,
     }));

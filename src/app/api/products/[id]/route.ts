@@ -14,13 +14,9 @@ export async function GET(
 ) {
     try {
         const user = await requireAuth();
-        const { id: idParam } = await params;
+        const { id } = await params;
         
-        // Convertir y validar el ID
-        const id = Number(idParam);
-        if (isNaN(id)) {
-            return errorResponse('El ID ingresado no es válido', 400);
-        }
+        if(!id) return errorResponse('El ID ingresado no es valido', 400)
 
         const productById = await getProductById(id);
 
@@ -58,13 +54,10 @@ export async function PUT(
 ) {
     try {
         const currentUser = await requireAuth();
-        const { id: idParam } = await params;
+        const { id } = await params;
         
         // Convertir y validar el ID
-        const id = Number(idParam);
-        if (isNaN(id)) {
-            return errorResponse('El ID ingresado no es válido', 400);
-        }
+        if (!id) return errorResponse('El ID ingresado no es valido', 400);
 
         const body = await request.json();
         const updatedProduct = await updateProduct(id, body, currentUser);
@@ -107,13 +100,10 @@ export async function DELETE(
 ) {
     try {
         const currentUser = await requireAuth();
-        const { id: idParam } = await params;
+        const { id } = await params;
         
         // Convertir y validar el ID
-        const id = Number(idParam);
-        if (isNaN(id)) {
-            return errorResponse('El ID ingresado no es válido', 400);
-        }
+        if (!id) return errorResponse('El ID ingresado no es valido', 400);
 
         const deletedProduct = await deleteProduct(id, currentUser);
 
