@@ -22,6 +22,7 @@ import { ProductsClientProps } from '@/types/product';
 import { getStatusBadgeColor } from '@/utils/presentation';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/price';
+import Link from 'next/link';
 
 export default function ProductsClient({ initialProducts, categories }: ProductsClientProps) {
   const router = useRouter();
@@ -137,7 +138,7 @@ export default function ProductsClient({ initialProducts, categories }: Products
     if (!hasFilters || activeFiltersCount === 0) return null;
     
     return (
-      <div className="flex items-center gap-2 mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+      <div className="flex items-center gap-2 mb-4 p-6 bg-blue-50 rounded-lg border border-blue-200">
         <Filter className="w-4 h-4 text-blue-600" />
         <span className="text-sm text-blue-700">
           {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} aplicado{activeFiltersCount !== 1 ? 's' : ''}
@@ -189,7 +190,12 @@ export default function ProductsClient({ initialProducts, categories }: Products
               <Package className="w-5 h-5 text-gray-600" />
             </div>
             <div>
-              <div className="font-medium">{product.name}</div>
+              <Link 
+                className="font-medium text-red-950 hover:underline hover:cursor-pointer"
+                href={`/dashboard/products/edit/${product.id}`}
+              >
+                {product.name}
+              </Link>
               <div className="text-xs text-gray-500 line-clamp-1 max-w-[200px]">
                 {product.description || 'Sin descripción'}
               </div>
@@ -254,7 +260,7 @@ export default function ProductsClient({ initialProducts, categories }: Products
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto p-6 pt-6 md:p-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>

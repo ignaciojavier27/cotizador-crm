@@ -64,7 +64,7 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto p-6  md:p-10">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

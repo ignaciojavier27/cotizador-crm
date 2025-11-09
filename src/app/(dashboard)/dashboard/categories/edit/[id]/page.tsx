@@ -28,7 +28,7 @@ export default async function EditCategoryPage({ params }: EditCategoryPageProps
 
                 {/* Card */}
                 <div className="rounded-lg bg-white p-8 shadow-lg">
-                    <EditCategoryForm categoryId={Number(id)} currentUser={currentUser} />
+                    <EditCategoryForm categoryId={id} currentUser={currentUser} />
                 </div>
             </div>
         </div>  
