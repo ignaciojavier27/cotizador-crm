@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer, { Browser } from 'puppeteer-core';
+import { Browser } from 'puppeteer-core';
 import { generateQuotationHTML } from '@/lib/pdf-template';
 import { QuotationPDFData } from '@/types/pdf';
 import { prisma } from '@/lib/prisma';
@@ -16,7 +16,7 @@ export async function POST(
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const quotationId = params.id;
+    const quotationId = await params.id;
 
     // Obtener la cotización con toda la información relacionada
     const quotation = await prisma.quotation.findUnique({
@@ -65,26 +65,29 @@ export async function POST(
 
     // Configurar Puppeteer para generar el PDF
     let browser: Browser | undefined;
-    
+
     try {
       // En producción, usar puppeteer-core con chrome-aws-lambda
       if (process.env.NODE_ENV === 'production') {
         const chrome = await import('chrome-aws-lambda');
-        browser = await puppeteer.launch({
+        const puppeteerCore = await import('puppeteer-core');
+
+        browser = await puppeteerCore.default.launch({
           args: [...chrome.default.args, '--no-sandbox', '--disable-setuid-sandbox'],
           executablePath: await chrome.default.executablePath,
           headless: chrome.default.headless,
-        });
+        }) as unknown as Browser;
       } else {
-        // En desarrollo
-        browser = await puppeteer.launch({
+        // En desarrollo, usar puppeteer completo
+        const puppeteer = await import('puppeteer');
+        browser = await puppeteer.default.launch({
           headless: true,
           args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        });
+        }) as unknown as Browser;
       }
 
       const page = await browser.newPage();
-      
+
       // Establecer el contenido HTML
       await page.setContent(htmlContent, {
         waitUntil: 'networkidle0',
@@ -94,23 +97,23 @@ export async function POST(
         format: 'a4',
         printBackground: true,
         margin: {
-            top: '15px',
-            right: '15px',
-            bottom: '15px',
-            left: '15px',
+          top: '15px',
+          right: '15px',
+          bottom: '15px',
+          left: '15px',
         },
       });
 
       await browser.close();
 
-        // SOLUCIÓN: Usar Uint8Array que siempre es compatible
+      // SOLUCIÓN: Usar Uint8Array que siempre es compatible
       const uint8Array = new Uint8Array(pdfBuffer);
       const blob = new Blob([uint8Array], { type: 'application/pdf' });
 
       return new NextResponse(blob, {
         headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="cotizacion-${quotation.quotationNumber}.pdf"`
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="cotizacion-${quotation.quotationNumber}.pdf"`
         }
       });
 

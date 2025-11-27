@@ -31,7 +31,7 @@ export function useQuotations({
   autoFetch = false,
 }: UseQuotationsProps) {
   const router = useRouter();
-  
+
   const [quotations, setQuotations] = useState<QuotationDashboard[]>(initialQuotations);
   const [pagination, setPagination] = useState(initialPagination);
   const [filters, setFilters] = useState<QuotationFilters>(initialFilters);
@@ -50,7 +50,7 @@ export function useQuotations({
    */
   const buildQueryString = useCallback((filterObj: QuotationFilters): string => {
     const params = new URLSearchParams();
-    
+
     Object.entries(filterObj).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
         params.set(key, String(value));
@@ -182,6 +182,12 @@ export function useQuotations({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoFetch]);
+
+  // Sincronizar estado local cuando cambian las props (ej: después de router.refresh())
+  useEffect(() => {
+    setQuotations(initialQuotations);
+    setPagination(initialPagination);
+  }, [initialQuotations, initialPagination]);
 
   return {
     quotations,

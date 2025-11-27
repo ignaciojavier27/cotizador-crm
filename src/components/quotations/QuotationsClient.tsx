@@ -51,23 +51,23 @@ import { formatCurrency } from "@/utils/date";
 
 
 const statusMap = {
-  sent: { 
-    label: "Enviada", 
+  sent: {
+    label: "Enviada",
     variant: "default" as const,
     className: "bg-blue-100 text-blue-800 border-blue-200"
   },
-  accepted: { 
-    label: "Aceptada", 
+  accepted: {
+    label: "Aceptada",
     variant: "outline" as const,
     className: "border-green-500 text-green-700 bg-green-50"
   },
-  rejected: { 
-    label: "Rechazada", 
+  rejected: {
+    label: "Rechazada",
     variant: "destructive" as const,
     className: ""
   },
-  expired: { 
-    label: "Expirada", 
+  expired: {
+    label: "Expirada",
     variant: "secondary" as const,
     className: ""
   },
@@ -150,7 +150,7 @@ export default function QuotationsClient({
 
   const handleDeleteQuotation = async (id: string, quotationNumber: string) => {
     if (!confirmDelete(`la cotización ${quotationNumber}`)) return;
-    
+
     try {
       await deleteQuotation(id);
       notify.success("Cotización eliminada correctamente");
@@ -262,7 +262,7 @@ export default function QuotationsClient({
           )}
         </TableCell>
         <TableCell>
-          <Badge 
+          <Badge
             variant={statusMap[quotation.status].variant}
             className={statusMap[quotation.status].className}
           >
@@ -284,13 +284,13 @@ export default function QuotationsClient({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => router.push(`/dashboard/quotations/${quotation.id}`)}
+                onClick={() => router.push(`/dashboard/quotations/details/${quotation.id}`)}
                 className="cursor-pointer"
               >
                 <Eye className="w-4 h-4 mr-2" />
                 Ver detalle
               </DropdownMenuItem>
-              
+
               {quotation.status === "sent" && (
                 <>
                   <DropdownMenuItem
