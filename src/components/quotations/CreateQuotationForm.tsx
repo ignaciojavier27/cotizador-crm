@@ -114,18 +114,24 @@ export default function CreateQuotationForm({
     async function onSubmit(data: FormValues) {
         setIsSubmitting(true);
         try {
+            console.log("Enviando datos al servidor...");
             const result = await createQuotationWithData(data);
+            console.log("Resultado recibido:", result);
 
-            if (!result?.success) {
+            if (result?.success === false) {
                 toast.error(result?.error || "Error al crear la cotización");
+                setIsSubmitting(false);
                 return;
             }
 
+            console.log("Mostrando toast de éxito...");
             toast.success("Cotización creada exitosamente");
+            console.log("Intentando navegar a /dashboard/quotations...");
+            router.push("/dashboard/quotations");
+            console.log("router.push ejecutado");
         } catch (error) {
-            console.error(error);
+            console.error("Error en onSubmit:", error);
             toast.error("Ocurrió un error inesperado");
-        } finally {
             setIsSubmitting(false);
         }
     }
@@ -138,9 +144,14 @@ export default function CreateQuotationForm({
         }
     };
 
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        form.handleSubmit(onSubmit)(e);
+    };
+
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={handleFormSubmit} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Left Column: Client & Info */}
                     <div className="md:col-span-1 space-y-6">

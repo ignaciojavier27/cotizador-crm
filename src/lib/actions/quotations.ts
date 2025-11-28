@@ -5,6 +5,10 @@ import { createQuotation } from "@/lib/services/quotationServices";
 import { createQuotationSchema } from "@/lib/validations/quotation";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { QuotationPDFData } from "@/types/pdf";
+import { generateQuotationPDF } from "@/lib/services/pdfService";
+import { sendQuotationEmail } from "@/lib/services/emailService";
 
 export type ActionState = {
     success?: boolean;
@@ -82,9 +86,65 @@ export async function createQuotationWithData(data: any) {
             };
         }
 
-        await createQuotation(validationResult.data, user.id, user.companyId);
+        const quotation = await createQuotation(validationResult.data, user.id, user.companyId);
 
-        revalidatePath("/dashboard/quotations");
+        // --- INICIO: Generar PDF y Enviar Correo ---
+        try {
+            console.log("Iniciando proceso de envío de correo...");
+            // 1. Obtener datos de la empresa para el PDF
+            const company = await prisma.company.findUnique({
+                where: { id: user.companyId }
+            });
+            console.log("Empresa encontrada:", company?.name);
+
+            if (company && quotation.client.email) {
+                console.log("Cliente tiene email:", quotation.client.email);
+                // 2. Preparar datos para el PDF
+                const pdfData: QuotationPDFData = {
+                    quotation: {
+                        ...quotation,
+                        total: quotation.total ? Number(quotation.total) : null,
+                        totalTax: quotation.totalTax ? Number(quotation.totalTax) : null,
+                        details: quotation.details.map(detail => ({
+                            ...detail,
+                            unitPrice: Number(detail.unitPrice),
+                            subtotal: detail.subtotal ? Number(detail.subtotal) : null,
+                            lineTax: detail.lineTax ? Number(detail.lineTax) : null,
+                            product: {
+                                ...detail.product,
+                                basePrice: Number(detail.product.basePrice),
+                                taxPercentage: detail.product.taxPercentage ? Number(detail.product.taxPercentage) : null,
+                            },
+                        })),
+                        company: company
+                    },
+                    company: company,
+                };
+
+                // 3. Generar PDF
+                console.log("Generando PDF...");
+                const pdfBuffer = await generateQuotationPDF(pdfData);
+                console.log("PDF generado. Tamaño:", pdfBuffer.length);
+
+                // 4. Enviar Correo
+                console.log("Enviando correo a:", quotation.client.email);
+                await sendQuotationEmail({
+                    to: quotation.client.email,
+                    clientName: quotation.client.name,
+                    quotationNumber: quotation.quotationNumber,
+                    pdfBuffer: pdfBuffer,
+                    companyName: company.name,
+                });
+                console.log("Correo enviado exitosamente.");
+            } else {
+                console.log("No se envía correo: Falta empresa o email del cliente.");
+            }
+        } catch (emailError) {
+            console.error("Error CRÍTICO al enviar el correo de la cotización:", emailError);
+            // No fallamos la request completa si falla el correo, pero lo logueamos
+        }
+        // --- FIN: Generar PDF y Enviar Correo ---
+        return { success: true };
     } catch (error) {
         console.error("Error creating quotation:", error);
         if (error instanceof Error) {
@@ -92,6 +152,4 @@ export async function createQuotationWithData(data: any) {
         }
         return { success: false, error: "Error al crear la cotización" };
     }
-
-    redirect("/dashboard/quotations");
 }

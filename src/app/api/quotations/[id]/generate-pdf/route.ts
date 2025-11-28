@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Browser } from 'puppeteer-core';
-import { generateQuotationHTML } from '@/lib/pdf-template';
+import { generateQuotationPDF } from '@/lib/services/pdfService';
 import { QuotationPDFData } from '@/types/pdf';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth/authorize';
@@ -60,70 +59,19 @@ export async function POST(
       company: quotation.company,
     };
 
-    // Generar el HTML del PDF
-    const htmlContent = generateQuotationHTML(pdfData);
+    // Generar el PDF usando el servicio
+    const pdfBuffer = await generateQuotationPDF(pdfData);
 
-    // Configurar Puppeteer para generar el PDF
-    let browser: Browser | undefined;
+    // SOLUCIÓN: Usar Uint8Array que siempre es compatible
+    const uint8Array = new Uint8Array(pdfBuffer);
+    const blob = new Blob([uint8Array], { type: 'application/pdf' });
 
-    try {
-      // En producción, usar puppeteer-core con chrome-aws-lambda
-      if (process.env.NODE_ENV === 'production') {
-        const chrome = await import('chrome-aws-lambda');
-        const puppeteerCore = await import('puppeteer-core');
-
-        browser = await puppeteerCore.default.launch({
-          args: [...chrome.default.args, '--no-sandbox', '--disable-setuid-sandbox'],
-          executablePath: await chrome.default.executablePath,
-          headless: chrome.default.headless,
-        }) as unknown as Browser;
-      } else {
-        // En desarrollo, usar puppeteer completo
-        const puppeteer = await import('puppeteer');
-        browser = await puppeteer.default.launch({
-          headless: true,
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        }) as unknown as Browser;
+    return new NextResponse(blob, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="cotizacion-${quotation.quotationNumber}.pdf"`
       }
-
-      const page = await browser.newPage();
-
-      // Establecer el contenido HTML
-      await page.setContent(htmlContent, {
-        waitUntil: 'networkidle0',
-      });
-
-      const pdfBuffer = await page.pdf({
-        format: 'a4',
-        printBackground: true,
-        margin: {
-          top: '15px',
-          right: '15px',
-          bottom: '15px',
-          left: '15px',
-        },
-      });
-
-      await browser.close();
-
-      // SOLUCIÓN: Usar Uint8Array que siempre es compatible
-      const uint8Array = new Uint8Array(pdfBuffer);
-      const blob = new Blob([uint8Array], { type: 'application/pdf' });
-
-      return new NextResponse(blob, {
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="cotizacion-${quotation.quotationNumber}.pdf"`
-        }
-      });
-
-    } catch (puppeteerError) {
-      console.error('Error con Puppeteer:', puppeteerError);
-      if (browser) {
-        await browser.close();
-      }
-      throw new Error(`Error generando PDF: ${puppeteerError instanceof Error ? puppeteerError.message : 'Error desconocido'}`);
-    }
+    });
 
   } catch (error) {
     console.error('Error generando PDF:', error);
