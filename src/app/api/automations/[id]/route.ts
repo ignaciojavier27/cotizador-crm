@@ -34,7 +34,7 @@ export async function PUT(
         }
 
         const body = await req.json();
-        const validation = automationSchema.safeParse(body);
+        const validation = automationSchema.partial().safeParse(body);
 
         if (!validation.success) {
             return NextResponse.json(
