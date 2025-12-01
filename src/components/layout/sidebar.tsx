@@ -49,6 +49,12 @@ const menuItems = [
         roles: ['admin', 'seller'],
       },
       {
+        title: 'Impuestos',
+        href: '/dashboard/taxes',
+        icon: Settings,
+        roles: ['admin'],
+      },
+      {
         title: 'Categorías',
         href: '/dashboard/categories',
         icon: Tags,
@@ -73,7 +79,7 @@ const menuItems = [
       },
       {
         title: 'Empresa',
-        href: '/dashboard/company',
+        href: '/dashboard/companies',
         icon: Building2,
         roles: ['admin'],
       },
@@ -88,17 +94,6 @@ const menuItems = [
         href: '/dashboard/reports',
         icon: BarChart3,
         roles: ['admin'],
-      },
-    ],
-  },
-  {
-    title: 'Sistema',
-    items: [
-      {
-        title: 'Configuración',
-        href: '/dashboard/settings',
-        icon: Settings,
-        roles: ['admin', 'seller'],
       },
     ],
   },
